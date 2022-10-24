@@ -1,0 +1,58 @@
+{
+  "log_path": "/var/log/rt-data-loader",
+
+  "connectors": {
+    "databases": {
+      "redshift": {
+        "type": "postgres",
+        "server": "0.0.0.0",
+        "port": "5439",
+        "database": "corp",
+        "login": "XXXXX",
+        "password": "xxxx"
+      },
+      "expert": {
+        "type": "sqlserver",
+        "server": "0.0.0.0",
+        "port": "1433",
+        "database": "ExpeRTMart",
+        "login": "XXXXX",
+        "password": "xxxxx"
+      },
+      "avaya": {
+        "type": "sqlserver",
+        "server": "0.0.0.0",
+        "port": "1433",
+        "database": "CustOpsDataHist",
+        "login": "XXXXX",
+        "password": "xxxxx"
+      }
+    },
+    "file_shares": {
+      "avaya_cms": {
+        "type": "smb",
+        "server": "CHIDXCORPFIL",
+        "domain": "sea",
+        "use_ntlm_v2": true,
+        "is_direct_tcp": true,
+        "server_ip": "0.0.0.0",
+        "port": 445,
+        "client_machine": "",
+        "login": "XXXXX",
+        "password": "xxxxx"
+      }
+    }
+  },
+
+  "listeners": {
+    "amqp": {
+      "rabbitmq": {
+          "broker": "egebomq1-test.sb.karmalab.net",
+          "queue": "egencia.reporting.queue",
+          "login": "reporting-service",
+          "password": "xxxxx",
+          "port": ""
+      }
+    }
+  }
+}

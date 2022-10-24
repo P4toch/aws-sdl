@@ -1,0 +1,297 @@
+{
+	"config": {
+		"region": "us-west-2",
+		"bucket_data": "ege-gap-alpha-lab-uw2",
+		"bucket_data_s3": "s3://ege-gap-alpha-lab-uw2/GCO/public/CONTACT/EMAIL/EPTICA/",
+		"bucket_conf": "ege-gap-conf-alpha-lab-uw2",
+		"prefix_conf": "GCO/CONTACT/EMAIL/EPTICA/",
+		"prefix_raw": "GCO/raw/CONTACT/EMAIL/EPTICA/",
+		"prefix_stage": "GCO/stage/CONTACT/EMAIL/EPTICA/",
+		"prefix_public": "GCO/public/CONTACT/EMAIL/EPTICA/",
+		"redshift_copy_cmd": "copy {table} from 's3://{bucket}/{prefix}{file}' iam_role '{iam_role}' delimiter '{delimiter}' ACCEPTINVCHARS IGNOREHEADER 1 TRIMBLANKS EMPTYASNULL IGNOREBLANKLINES CSV;",
+		"redshift_copy_cmd_iam_role": "arn:aws:iam::506792119149:role/REDSHIFT_LAB_RT_S3_ACCESS",
+		"redshift_copy_cmd_delimiter": ";",
+		"redshift_public_schema": "public"
+	},
+	"get_files": [{
+			"source": {
+				"type": "http",
+				"location": "http://egenciabe.epticahosting.com/datamart/egenciabe/EpticaDatamart-egenciabe.zip",
+				"instance": "BE"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciade.epticahosting.com/datamart/egenciade/EpticaDatamart-egenciade.zip",
+				"instance": "DE"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciahss.epticahosting.com/datamart/egenciahss/EpticaDatamart-egenciahss.zip",
+				"instance": "HSS"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciauk.epticahosting.com/datamart/egenciauk/EpticaDatamart-egenciauk.zip",
+				"instance": "UK"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciafr.epticahosting.com/datamart/egenciafr/EpticaDatamart-egenciafr.zip",
+				"instance": "FR"
+			},
+			"is_active": 0
+		},
+	    {
+		    "source" : {
+			    "type" : "http",
+			    "location" : "https://egencianordics.epticahosting.com/datamart/egencianordics/EpticaDatamart-egencianordics.zip",
+                "instance" : "NORDICS"
+		    },
+		    "is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciasg.epticahosting.com/datamart/egenciasg/EpticaDatamart-egenciasg.zip",
+				"instance": "SG"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "https://egenciacn.epticahosting.com/datamart/egenciacn/EpticaDatamart-egenciacn.zip",
+				"instance": "CN"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciahk.epticahosting.com/datamart/egenciahk/EpticaDatamart-egenciahk.zip",
+				"instance": "HK"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciain.epticahosting.com/datamart/egenciain/EpticaDatamart-egenciain.zip",
+				"instance": "IN"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciaau.epticahosting.com/datamart/egenciaau/EpticaDatamart-egenciaau.zip",
+				"instance": "AU"
+			},
+			"is_active": 0
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciaph.epticahosting.com/datamart/egenciaph/EpticaDatamart-egenciaph.zip",
+				"instance": "PH"
+			},
+			"is_active": 0
+		}
+	],
+	"staging_to_public": [{
+			"file_name": "AccountEventInfo.csv",
+			"is_active": 1,
+			"sql_header": "eventid,accountid,accountgroupid,newaccountstate,previouseventid,applicationinstance,applicationid,eventdate",
+			"sql_format": "cast(coalesce(nullif(eventid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(accountgroupid,''),null) as int),cast(coalesce(nullif(newaccountstate,''),null) as int),cast(coalesce(nullif(previouseventid,''),null) as int),coalesce(nullif(applicationinstance,''),''),cast(coalesce(nullif(applicationid,''),null) as int),cast(coalesce(nullif(eventdate,''),null) as timestamp)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), eventid integer, accountid integer, accountgroupid integer, newaccountstate integer, previouseventid integer, applicationinstance character varying(50), applicationid integer, eventdate timestamp without time zone, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+
+		},
+		{
+			"file_name": "AccountGroupInfo.csv",
+			"is_active": 1,
+			"sql_header": "accountgroupid,parentaccountgroupid,accountgrouplabel,isvalid",
+			"sql_format": "cast(coalesce(nullif(accountgroupid,''),null) as int),cast(coalesce(nullif(parentaccountgroupid,''),null) as int),coalesce(nullif(accountgrouplabel,''),''),cast(coalesce(nullif(isvalid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), accountgroupid integer, parentaccountgroupid integer, accountgrouplabel character varying(255), isvalid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50));"
+		},
+		{
+			"file_name": "AccountGroupLabels.csv",
+			"is_active": 1,
+			"sql_header": "accountgroupid,accountgrouplabel,labellanguage",
+			"sql_format": "cast(coalesce(nullif(accountgroupid,''),null) as int),coalesce(nullif(accountgrouplabel,''),''),coalesce(nullif(labellanguage,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), accountgroupid integer, accountgrouplabel character varying(100), labellanguage character varying(25), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50));"
+		},
+		{
+			"file_name": "AccountInfo.csv",
+			"is_active": 1,
+			"sql_header": "accountid,accountgroupid,firstname,lastname,isguiagent,isemailagent,isautoagent,issupervisor,isadministrator,isvalid,isactive,isnetworkagent,accountlogin",
+			"sql_format": "cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(accountgroupid,''),null) as int),coalesce(nullif(firstname,''),''),coalesce(nullif(lastname,''),''),coalesce(nullif(isguiagent,''),''),coalesce(nullif(isemailagent,''),''),coalesce(nullif(isautoagent,''),''),coalesce(nullif(issupervisor,''),''),coalesce(nullif(isadministrator,''),''),cast(coalesce(nullif(isvalid,''),null) as int),coalesce(nullif(isactive,''),''),coalesce(nullif(isnetworkagent,''),''),coalesce(nullif(accountlogin,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), accountid integer, accountgroupid integer, firstname character varying(255), lastname character varying(255), isguiagent character varying(5), isemailagent character varying(5), isautoagent character varying(5), issupervisor character varying(5), isadministrator character varying(5), isvalid integer, isactive character varying(5), isnetworkagent character varying(5), accountlogin character varying(255), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "AccountStateLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "ApplicationTypeLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "CustomerFieldInfo.csv",
+			"is_active": 1,
+			"sql_header": "customerid,createddate,lastmodificationdate,address,address2,authinfoid,authinfotype,city,companyname,country,createddate_1,customerid_1,efpfbfriendscount,email,facebookid,fax,firstname,hintgroupid,homephone,lastmodificationdate_1,lastname,mobilephone,salutation,selfpass,state,twitterid,workphone,zipcode",
+			"sql_format": "cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(createddate,''),null) as timestamp),cast(coalesce(nullif(lastmodificationdate,''),null) as timestamp),coalesce(nullif(address,''),''),coalesce(nullif(address2,''),''),cast(coalesce(nullif(authinfoid,''),null) as int),cast(coalesce(nullif(authinfotype,''),null) as int),coalesce(nullif(city,''),''),coalesce(nullif(companyname,''),''),coalesce(nullif(country,''),''),cast(coalesce(nullif(createddate_1,''),null) as timestamp),cast(coalesce(nullif(customerid_1,''),null) as int),cast(coalesce(nullif(efpfbfriendscount,''),null) as int),coalesce(nullif(email,''),''),coalesce(nullif(facebookid,''),''),coalesce(nullif(fax,''),''),coalesce(nullif(firstname,''),''),cast(coalesce(nullif(hintgroupid,''),null) as int),coalesce(nullif(homephone,''),''),cast(coalesce(nullif(lastmodificationdate_1,''),null) as timestamp),coalesce(nullif(lastname,''),''),coalesce(nullif(mobilephone,''),''),coalesce(nullif(salutation,''),''),coalesce(nullif(selfpass,''),''),coalesce(nullif(state,''),''),coalesce(nullif(twitterid,''),''),coalesce(nullif(workphone,''),''),coalesce(nullif(zipcode,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), customerid integer, createddate timestamp without time zone, lastmodificationdate timestamp without time zone, address character varying(255), address2 character varying(255), authinfoid integer, authinfotype integer, city character varying(100), companyname character varying(255), country character varying(255), createddate_1 timestamp without time zone, customerid_1 integer, customernumber integer, efpfbfriendscount integer, email character varying(255), facebookid character varying(255), fax character varying(255), firstname character varying(255), hintgroupid integer, homephone character varying(255), lastmodificationdate_1 timestamp without time zone, lastname character varying(255), mobilephone character varying(255), salutation character varying(100), salutationid integer, selfpass character varying(255), state character varying(255), twitterid character varying(255), workphone character varying(255), zipcode character varying(100), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "EventInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,eventid,eventmajorid,eventminorid,newrequeststateid,eventdate,accountid,customeremaileventid,speedofanswer,speedofanswerworkinghours,handlingtime,templateid,speedofreview,toaccountid,toaccountgroupid",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),cast(coalesce(nullif(eventid,''),null) as int),cast(coalesce(nullif(eventmajorid,''),null) as int),cast(coalesce(nullif(eventminorid,''),null) as int),cast(coalesce(nullif(newrequeststateid,''),null) as int),cast(coalesce(nullif(eventdate,''),null) as timestamp),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(customeremaileventid,''),null) as int),cast(coalesce(nullif(speedofanswer,''),null) as int),cast(coalesce(nullif(speedofanswerworkinghours,''),null) as int),cast(coalesce(nullif(handlingtime,''),null) as int),cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(speedofreview,''),null) as int),cast(coalesce(nullif(toaccountid,''),null) as int),cast(coalesce(nullif(toaccountgroupid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), requestid integer, eventid integer, eventmajorid integer, eventminorid integer, newrequeststateid integer, eventdate timestamp without time zone, accountid integer, customeremaileventid integer, speedofanswer integer, speedofanswerworkinghours integer, handlingtime integer, templateid integer, speedofreview integer, toaccountid integer, toaccountgroupid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "EventMajorLabel.csv",
+			"is_active": 1,
+			"sql_header": "eventmajorid,eventmajor",
+			"sql_format": "cast(coalesce(nullif(eventmajorid,''),null) as int),coalesce(nullif(eventmajor,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), eventmajorid integer, eventmajor character varying(200), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "EventMinorLabel.csv",
+			"is_active": 1,
+			"sql_header": "eventminorid,eventminor",
+			"sql_format": "cast(coalesce(nullif(eventminorid,''),null) as int),coalesce(nullif(eventminor,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), eventminorid integer, eventminor character varying(200), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "LovField.csv",
+			"is_active": 1,
+			"sql_header": "lovid,lovparentid,lovorderingrank,lovcreationdate,lovmodificationdate",
+			"sql_format": "cast(coalesce(nullif(lovid,''),null) as int),cast(coalesce(nullif(lovparentid,''),null) as int),cast(coalesce(nullif(lovorderingrank,''),null) as int),cast(coalesce(nullif(lovcreationdate,''),null) as timestamp),cast(coalesce(nullif(lovmodificationdate,''),null) as timestamp)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), lovid integer, lovparentid integer, lovorderingrank integer, lovcreationdate timestamp without time zone, lovmodificationdate timestamp without time zone, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "LovFieldValues.csv",
+			"is_active": 1,
+			"sql_header": "lovid,lovlabel,lovlabellanguage",
+			"sql_format": "cast(coalesce(nullif(lovid,''),null) as int),coalesce(nullif(lovlabel,''),''),coalesce(nullif(lovlabellanguage,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), lovid integer, lovlabel character varying(100), lovlabellanguage character varying(25), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "RequestFieldInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,action,actionid,eadscommitment,eadsinfos,eadsinitobjdate,eadspercentage,eadsreopobjdate,eadsthreshold,eadstimezone,efpcategory,efporiginator,efpquestionid,efpusername,ermterror,esodata,moduleteam,moduleteamid,product,productid,requestid_1",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),coalesce(nullif(action,''),''),cast(coalesce(nullif(actionid,''),null) as int),coalesce(nullif(eadscommitment,''),''),coalesce(nullif(eadsinfos,''),''),coalesce(nullif(eadsinitobjdate,''),''),cast(coalesce(nullif(eadspercentage,''),null) as int),coalesce(nullif(eadsreopobjdate,''),''),coalesce(nullif(eadsthreshold,''),''),coalesce(nullif(eadstimezone,''),''),coalesce(nullif(efpcategory,''),''),coalesce(nullif(efporiginator,''),''),coalesce(nullif(efpquestionid,''),''),coalesce(nullif(efpusername,''),''),coalesce(nullif(ermterror,''),''),coalesce(nullif(esodata,''),''),coalesce(nullif(moduleteam,''),''),cast(coalesce(nullif(moduleteamid,''),null) as int),coalesce(nullif(product,''),''),cast(coalesce(nullif(productid,''),null) as int),cast(coalesce(nullif(requestid_1,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), requestid integer, action character varying(255), actionid integer, eadscommitment character varying(255), eadsinfos character varying(255), eadsinitobjdate character varying(100), eadspercentage integer, eadsreopobjdate character varying(100), eadsthreshold character varying(100), eadstimezone character varying(100), efpcategory character varying(255), efporiginator character varying(255), efpquestionid character varying(255), efpusername character varying(255), esodata character varying(255), moduleteam character varying(255), moduleteamid integer, product character varying(100), productid integer, requestid_1 integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50), ermterror character varying(300))"
+		},
+		{
+			"file_name": "RequestInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,requestopeningdate,requestclosingdate,requeststateid,requestmedia,requesttypeid,requestsource,requestlanguage,requestclosingagentid,requestclosinggroupid,incomingemailnbr,outgoingemailnbr,distributable,customerid",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),cast(coalesce(nullif(requestopeningdate,''),null) as timestamp),cast(coalesce(nullif(requestclosingdate,''),null) as timestamp),cast(coalesce(nullif(requeststateid,''),null) as int),coalesce(nullif(requestmedia,''),'0'),cast(coalesce(nullif(requesttypeid,''),null) as int),coalesce(nullif(requestsource,''),'0'),coalesce(nullif(requestlanguage,''),'0'),cast(coalesce(nullif(requestclosingagentid,''),null) as int),cast(coalesce(nullif(requestclosinggroupid,''),null) as int),cast(coalesce(nullif(incomingemailsnbr,''),null) as int),cast(coalesce(nullif(outgoingemailsnbr,''),null) as int),coalesce(nullif(distributable,''),'0'),cast(coalesce(nullif(customerid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), requestid integer, requestopeningdate timestamp without time zone, requestclosingdate timestamp without time zone, requeststateid integer, requestmedia character varying(100), requesttypeid integer, requestsource character varying(100), requestlanguage character varying(50), requestclosingagentid integer, requestclosinggroupid integer, incomingemailnbr integer, outgoingemailnbr integer, distributable character varying(10), customerid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "RequestStateLabel.csv",
+			"is_active": 1,
+			"sql_header": "requeststateid,requeststate",
+			"sql_format": "cast(coalesce(nullif(requeststateid,''),null) as int),coalesce(nullif(requeststate,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), requeststateid integer, requeststate character varying(50), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "RequestTypeLabel.csv",
+			"is_active": 1,
+			"sql_header": "requesttypeid,requesttype",
+			"sql_format": "cast(coalesce(nullif(requesttypeid,''),null) as int),coalesce(nullif(requesttype,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), requesttypeid integer, requesttype character varying(50), datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "SearchInfo.csv",
+			"is_active": 1,
+			"sql_header": "searchid,sentenceid,locale,applicationinstance,searchkind,searchdate,customerid,accountid,sessionid,requestid,nbtemplatefound,toptemplateid",
+			"sql_format": "cast(coalesce(nullif(searchid,''),null) as int),cast(coalesce(nullif(sentenceid,''),null) as int),coalesce(nullif(locale,''),''),coalesce(nullif(applicationinstance,''),''),cast(coalesce(nullif(searchkind,''),null) as int),cast(coalesce(nullif(searchdate,''),null) as timestamp),cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(sessionid,''),null) as int),cast(coalesce(nullif(requestid,''),null) as int),coalesce(nullif(nbtemplatefound,''),''),cast(coalesce(nullif(toptemplateid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), searchid integer, sentenceid integer, locale character varying(50), applicationinstance character varying(100), searchkind integer, searchdate timestamp without time zone, customerid integer, accountid integer, sessionid integer, requestid integer, nbtemplatefound character varying(50), toptemplateid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "SearchKindLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "SearchSequencesInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "SearchWordInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateGroupInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateGroupLabels.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateHitInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateInfo.csv",
+			"is_active": 1,
+			"sql_header": "templateid,templategroupid,templatetitle,templateisvalid,templatedoesnotexpire,templatestartvaliditydate,templateendvaliditydate,templatemodificationdate,templatecreationdate,templatecreatorid,templatemodifierid",
+			"sql_format": "cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(templategroupid,''),null) as int),coalesce(nullif(templatetitle,''),''),coalesce(nullif(templateisvalid,''),''),coalesce(nullif(templatedoesnotexpire,''),''),cast(coalesce(nullif(templatestartvaliditydate,''),null) as timestamp),cast(coalesce(nullif(templateendvaliditydate,''),null) as timestamp),cast(coalesce(nullif(templatemodificationdate,''),null) as timestamp),cast(coalesce(nullif(templatecreationdate,''),null) as timestamp),cast(coalesce(nullif(templatecreatorid,''),null) as int),cast(coalesce(nullif(templatemodifierid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), templateid integer, templategroupid integer, templatetitle character varying(255), templateisvalid character varying(5), templatedoesnotexpire character varying(5), templatestartvaliditydate timestamp without time zone, templateendvaliditydate timestamp without time zone, templatemodificationdate timestamp without time zone, templatecreationdate timestamp without time zone, templatecreatorid integer, templatemodifierid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		},
+		{
+			"file_name": "TemplateLabels.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateRankInfo.csv",
+			"is_active": 1,
+			"sql_header": "templateid,rankdate,rankapplicationtype,rankinstancename,rankvalue,ranklanguage,customerid,accountid",
+			"sql_format": "cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(rankdate,''),null) as timestamp),coalesce(nullif(rankapplicationtype,''),''),coalesce(nullif(rankinstancename,''),''),coalesce(nullif(rankvalue,''),''),coalesce(nullif(ranklanguage,''),''),cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10), templateid integer, rankdate timestamp without time zone, rankapplicationtype character varying(100), rankinstancename character varying(255), rankvalue character varying(100), ranklanguage character varying(50), customerid integer, accountid integer, datalakefilelocation character varying(255), isrecordactive integer, creationdate timestamp without time zone, updateddate timestamp without time zone, createdby character varying(50))"
+		}
+	]
+}

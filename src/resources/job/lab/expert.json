@@ -1,0 +1,304 @@
+{
+  "config": {
+    "region": "us-west-2",
+    "bucket_data": "ege-gap-alpha-lab-uw2",
+    "bucket_data_http": "https://s3-us-west-2.amazonaws.com/ege-gap-alpha-lab-uw2/GCO/public/CONTACT/EMAIL/EXPERT/DELTA/",
+    "bucket_conf": "ege-gap-conf-alpha-lab-uw2",
+    "prefix_conf": "GCO/CONTACT/EMAIL/EXPERT/",
+    "prefix_raw": "GCO/raw/CONTACT/EMAIL/EXPERT/",
+    "prefix_stage": "GCO/stage/CONTACT/EMAIL/EXPERT/",
+    "prefix_public": "GCO/public/CONTACT/EMAIL/EXPERT/",
+    "delta_loading_file": "expert_delta_loading.json",
+    "redshift_copy_cmd": "copy {table} from 's3://{bucket}/{prefix}{file}' iam_role '{iam_role}' delimiter '{delimiter}' ACCEPTINVCHARS IGNOREHEADER 1 TRIMBLANKS EMPTYASNULL IGNOREBLANKLINES CSV;",
+    "redshift_copy_cmd_iam_role": "arn:aws:iam::506792119149:role/REDSHIFT_LAB_RT_S3_ACCESS",
+    "redshift_copy_cmd_delimiter": ";"
+  },
+  "get_data": [
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCaseHistory",
+        "columnid": "CaseHistoryID",
+        "sql": "select CaseHistoryID,convert(varchar,CaseHistoryDate,120) as CaseHistoryDate,UpdateAgentID,CaseID,AssignedAgentID,WorkGroupID,TRL,CaseStatusID,CaseClosed,CasePriorityID,CaseSourceID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,PredecessorID from dbo.ExpeRTCaseHistory (nolock) where ((1 = {full} and CaseHistoryID >= 64845504 and CaseHistoryID <= {maxid}) or (0 = {full} and CaseHistoryID > {lastprocessedid} and CaseHistoryID <= {maxid}))",
+        "sql_": "select CaseHistoryID,convert(varchar,CaseHistoryDate,120) as CaseHistoryDate,UpdateAgentID,CaseID,AssignedAgentID,WorkGroupID,TRL,CaseStatusID,CaseClosed,CasePriorityID,CaseSourceID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,PredecessorID from dbo.ExpeRTCaseHistory (nolock) where CaseHistoryID >= 64845504 and CaseHistoryID <= {max_id} and CaseHistoryID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_case_history",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_case_history_stage",
+        "stage_table": "stage.expert_case_history_stage",
+        "delta_query_part_1": "insert into public.expert_case_history select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_history_stage es left outer join public.expert_case_history ep on ep.casehistoryid = es.casehistoryid where ep.casehistoryid is null",
+        "create_stage_table": "create table if not exists stage.expert_case_history_stage      (      casehistoryid    integer       NOT NULL,      casehistorydate  timestamp     NOT NULL,      updateagentid    integer,      caseid           integer       NOT NULL,      assignedagentid  integer,      workgroupid      integer       NOT NULL,      trl              varchar(20),      casestatusid     integer       NOT NULL,      caseclosed       boolean       NOT NULL,      casepriorityid   smallint      NOT NULL,      casesourceid     smallint      NOT NULL,      casecategory1id  smallint      NOT NULL,      casecategory2id  smallint      NOT NULL,      casecategory3id  smallint      NOT NULL,      casecategory4id  smallint      NOT NULL,      predecessorid    integer      );      commit;",
+        "create_public_table": "create table if not exists public.expert_case_history      (      casehistoryid    integer       NOT NULL,      casehistorydate  timestamp     NOT NULL,      updateagentid    integer,      caseid           integer       NOT NULL,      assignedagentid  integer,      workgroupid      integer       NOT NULL,      trl              varchar(20),      casestatusid     integer       NOT NULL,      caseclosed       boolean       NOT NULL,      casepriorityid   smallint      NOT NULL,      casesourceid     smallint      NOT NULL,      casecategory1id  smallint      NOT NULL,      casecategory2id  smallint      NOT NULL,      casecategory3id  smallint      NOT NULL,      casecategory4id  smallint      NOT NULL,      predecessorid    integer,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCaseDaily",
+        "columnid": "CaseKey",
+        "sql": "select CaseKey,CaseID,CaseDateKey,CaseReportingStatusID,convert(varchar,CaseDate,120) as CaseDate,DurationDistID,OpenDate,CaseSourceID,WorkGroupID,AgentID,TravelProductID,TUID,TRL,CaseStatusID,CaseClosed,CasePriorityID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,AdjustmentAmount,AdjustmentReasonID,CountDistinct,DurationHours from dbo.ExpeRTCaseDaily (nolock) where ((1 = {full} and CaseKey >= 210080070 and CaseKey <= {maxid}) or (0 = {full} and CaseKey > {lastprocessedid} and CaseKey <= {maxid}))",
+        "sql_": "select CaseKey,CaseID,CaseDateKey,CaseReportingStatusID,convert(varchar,CaseDate,120) as CaseDate,DurationDistID,OpenDate,CaseSourceID,WorkGroupID,AgentID,TravelProductID,TUID,TRL,CaseStatusID,CaseClosed,CasePriorityID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,AdjustmentAmount,AdjustmentReasonID,CountDistinct,DurationHours from dbo.ExpeRTCaseDaily (nolock) where CaseKey >= 210080070 and CaseKey <= {max_id} and CaseKey > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_case_daily",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_case_daily_stage",
+        "stage_table": "stage.expert_case_daily_stage",
+        "delta_query_part_1": "insert into public.expert_case_daily select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_daily_stage es left outer join public.expert_case_daily ep on ep.casekey = es.casekey where ep.casekey is null",
+        "create_stage_table": "create table if not exists stage.expert_case_daily_stage      (      casekey                integer,      caseid                 integer,      casedatekey            timestamp,      casereportingstatusid  smallint,      casedate               timestamp,      durationdistid         smallint,      opendate               timestamp,      casesourceid           smallint,      workgroupid            integer,      agentid                integer,      travelproductid        integer,      tuid                   integer,      trl                    varchar(20),      casestatusid           integer,      caseclosed             boolean,      casepriorityid         smallint,      casecategory1id        integer,      casecategory2id        integer,      casecategory3id        integer,      casecategory4id        integer,      adjustmentamount       numeric(10,2),      adjustmentreasonid     smallint,      countdistinct          smallint,      durationhours          integer      );      commit;",
+        "create_public_table": "create table if not exists public.expert_case_daily      (      casekey                integer,      caseid                 integer,      casedatekey            timestamp,      casereportingstatusid  smallint,      casedate               timestamp,      durationdistid         smallint,      opendate               timestamp,      casesourceid           smallint,      workgroupid            integer,      agentid                integer,      travelproductid        integer,      tuid                   integer,      trl                    varchar(20),      casestatusid           integer,      caseclosed             boolean,      casepriorityid         smallint,      casecategory1id        integer,      casecategory2id        integer,      casecategory3id        integer,      casecategory4id        integer,      adjustmentamount       numeric(10,2),      adjustmentreasonid     smallint,      countdistinct          smallint,      durationhours          integer,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCaseCurrent",
+        "columnid": "CaseID",
+        "sql": "select CaseID,convert(varchar,CaseOpenDate,120) as CaseOpenDate,convert(varchar,CaseCloseDate,120) as CaseCloseDate,CaseSourceID,WorkGroupID,AgentID,TravelProductID,TUID,TRL,replace(replace(replace(CaseDescription, char(13), ''), char(10), ''), ';', ' ') as CaseDescription,CaseStatusID,CasePriorityID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,AdjustmentAmount,AdjustmentReasonID,UpdateDate from dbo.ExpeRTCaseCurrent (nolock) where ((1 = {full} and CaseID >= 119277935 and CaseID <= {maxid}) or (0 = {full} and CaseID > {lastprocessedid} and CaseID <= {maxid}))",
+        "sql_": "select CaseID,convert(varchar,CaseOpenDate,120) as CaseOpenDate,convert(varchar,CaseCloseDate,120) as CaseCloseDate,CaseSourceID,WorkGroupID,AgentID,TravelProductID,TUID,TRL,replace(replace(replace(CaseDescription, char(13), ''), char(10), ''), ';', ' ') as CaseDescription,CaseStatusID,CasePriorityID,CaseCategory1ID,CaseCategory2ID,CaseCategory3ID,CaseCategory4ID,AdjustmentAmount,AdjustmentReasonID,UpdateDate from dbo.ExpeRTCaseCurrent (nolock) where CaseID >= 119277935 and CaseID <= {max_id} and CaseID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_case_current",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_case_current_stage",
+        "stage_table": "stage.expert_case_current_stage",
+        "delta_query_part_1": "insert into public.expert_case_current select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_current_stage es left outer join public.expert_case_current ep on ep.caseid = es.caseid where ep.caseid is null",
+        "create_stage_table": "create table if not exists stage.expert_case_current_stage        (        caseid              integer         NOT NULL,        caseopendate        timestamp       NOT NULL,        caseclosedate       timestamp,        casesourceid        smallint        NOT NULL,        workgroupid         integer         NOT NULL,        agentid             integer         NOT NULL,        travelproductid     integer         NOT NULL,        tuid                integer         NOT NULL,        trl                 varchar(20),        casedescription     varchar(510),        casestatusid        integer         NOT NULL,        casepriorityid      smallint        NOT NULL,        casecategory1id     smallint        NOT NULL,        casecategory2id     smallint        NOT NULL,        casecategory3id     smallint        NOT NULL,        casecategory4id     smallint        NOT NULL,        adjustmentamount    numeric(10,2)   NOT NULL,        adjustmentreasonid  integer         NOT NULL,        updatedate          timestamp       NOT NULL        );        commit;",
+        "create_public_table": "create table if not exists public.expert_case_current      (      caseid              integer         NOT NULL,      caseopendate        timestamp       NOT NULL,      caseclosedate       timestamp,      casesourceid        smallint        NOT NULL,      workgroupid         integer         NOT NULL,      agentid             integer         NOT NULL,      travelproductid     integer         NOT NULL,      tuid                integer         NOT NULL,      trl                 varchar(20),      casedescription     varchar(510),      casestatusid        integer         NOT NULL,      casepriorityid      smallint        NOT NULL,      casecategory1id     smallint        NOT NULL,      casecategory2id     smallint        NOT NULL,      casecategory3id     smallint        NOT NULL,      casecategory4id     smallint        NOT NULL,      adjustmentamount    numeric(10,2)   NOT NULL,      adjustmentreasonid  integer         NOT NULL,      updatedate          timestamp       NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTHandleTime",
+        "columnid": "HandleTimeID",
+        "sql": "select HandleTimeID,CaseID,AgentID,convert(varchar,StartDate,120) as StartDate,convert(varchar,EndDate,120) as EndDate,StartDateKey,EndDateKey,convert(varchar,CreateDate,120) as CreateDate from dbo.ExpeRTHandleTime (nolock) where ((1 = {full} and HandleTimeID >= 6944104 and HandleTimeID <= {maxid}) or (0 = {full} and HandleTimeID > {lastprocessedid} and HandleTimeID <= {maxid}))",
+        "sql_": "select HandleTimeID,CaseID,AgentID,convert(varchar,StartDate,120) as StartDate,convert(varchar,EndDate,120) as EndDate,StartDateKey,EndDateKey,convert(varchar,CreateDate,120) as CreateDate from dbo.ExpeRTHandleTime (nolock) where HandleTimeID >= 6944104 and HandleTimeID <= {max_id} and HandleTimeID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_handle_time",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_handle_time_stage",
+        "stage_table": "stage.expert_handle_time_stage",
+        "delta_query_part_1": "insert into public.expert_handle_time select es.*, ",
+        "delta_query_part_2": " from stage.expert_handle_time_stage es left outer join public.expert_handle_time ep on ep.handletimeid = es.handletimeid where ep.handletimeid is null",
+        "create_stage_table": "create table if not exists stage.expert_handle_time_stage      (      handletimeid  integer     NOT NULL,      caseid        integer     NOT NULL,      agentid       integer     NOT NULL,      startdate     timestamp   NOT NULL,      enddate       timestamp   NOT NULL,      startdatekey  timestamp   NOT NULL,      enddatekey    timestamp   NOT NULL,      createdate    timestamp   NOT NULL      );      commit;",
+        "create_public_table": "create table if not exists public.expert_handle_time      (      handletimeid  integer     NOT NULL,      caseid        integer     NOT NULL,      agentid       integer     NOT NULL,      startdate     timestamp   NOT NULL,      enddate       timestamp   NOT NULL,      startdatekey  timestamp   NOT NULL,      enddatekey    timestamp   NOT NULL,      createdate    timestamp   NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTAHTDetail",
+        "columnid": "HandleTimeID",
+        "sql": "select HandleTimeID,CaseID,AgentID,convert(varchar,StartDate,120) as StartDate,convert(varchar,EndDate,120) as EndDate,StartDateKey,EndDateKey,HandleTimeType,PointOfSaleEmail,AHTMinutes from dbo.ExpeRTAHTDetail (nolock) where ((1 = {full} and HandleTimeID >= 6944104 and HandleTimeID <= {maxid}) or (0 = {full} and HandleTimeID > {lastprocessedid} and HandleTimeID <= {maxid}))",
+        "sql_": "select HandleTimeID,CaseID,AgentID,convert(varchar,StartDate,120) as StartDate,convert(varchar,EndDate,120) as EndDate,StartDateKey,EndDateKey,HandleTimeType,PointOfSaleEmail,AHTMinutes from dbo.ExpeRTAHTDetail (nolock) where HandleTimeID >= 6944104 and HandleTimeID <= {max_id} and HandleTimeID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_aht_detail",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_aht_detail_stage",
+        "stage_table": "stage.expert_aht_detail_stage",
+        "delta_query_part_1": "insert into public.expert_aht_detail select es.*, ",
+        "delta_query_part_2": " from stage.expert_aht_detail_stage es left outer join public.expert_aht_detail ep on ep.handletimeid = es.handletimeid where ep.handletimeid is null",
+        "create_stage_table": "create table if not exists stage.expert_aht_detail_stage      (      handletimeid      integer         NOT NULL,      caseid            integer         NOT NULL,      agentid           integer         NOT NULL,      startdate         timestamp       NOT NULL,      enddate           timestamp       NOT NULL,      startdatekey      timestamp       NOT NULL,      enddatekey        timestamp       NOT NULL,      handletimetype    varchar(25)     NOT NULL,      pointofsaleemail  varchar(255)    NOT NULL,      ahtminutes        numeric(10,2)   NOT NULL      );      commit;",
+        "create_public_table": "create table if not exists public.expert_aht_detail        (        handletimeid      integer         NOT NULL,        caseid            integer         NOT NULL,        agentid           integer         NOT NULL,        startdate         timestamp       NOT NULL,        enddate           timestamp       NOT NULL,        startdatekey      timestamp       NOT NULL,        enddatekey        timestamp       NOT NULL,        handletimetype    varchar(25)     NOT NULL,        pointofsaleemail  varchar(255)    NOT NULL,        ahtminutes        numeric(10,2)   NOT NULL,        datalakefilelocation varchar(255),        isrecordactive       integer,        creationdate         timestamp,        updateddate          timestamp,        createdby            varchar(50)        );        commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTMessage",
+        "columnid": "MessageID",
+        "sql": "select MessageID,replace(replace(replace(replace(MessageSubject COLLATE Latin1_General_BIN,char(13),''),char(10),''),';',' '),char(0),'') as MessageSubject,AgentID,replace(replace(replace(ToEMailAddress,char(13),''),char(10),''),';',' ') as ToEMailAddress,replace(replace(replace(CCEmailAddress,char(13),''),char(10),''),';',' ') as CCEmailAddress,replace(replace(replace(BCCEmailAddress,char(13),''),char(10),''),';',' ') as BCCEmailAddress,replace(replace(replace(FromEMailAddress,char(13),''),char(10),''),';',' ') as FromEMailAddress,CaseID,OutboundFlag,replace(replace(replace(MailBoxName,char(13), ''),char(10),''),';',' ') as MailBoxName,MessageTemplateID,RuleID,CreateDate,CreateDateKey,AttachmentCount from dbo.ExpeRTMessage (nolock) where ((1 = {full} and MessageID >= 20292782 and MessageID <= {maxid}) or (0 = {full} and MessageID > {lastprocessedid} and MessageID <= {maxid}))",
+        "sql_": "select MessageID,replace(replace(replace(replace(MessageSubject COLLATE Latin1_General_BIN,char(13),''),char(10),''),';',' '),char(0),'') as MessageSubject,AgentID,replace(replace(replace(ToEMailAddress,char(13),''),char(10),''),';',' ') as ToEMailAddress,replace(replace(replace(CCEmailAddress,char(13),''),char(10),''),';',' ') as CCEmailAddress,replace(replace(replace(BCCEmailAddress,char(13),''),char(10),''),';',' ') as BCCEmailAddress,replace(replace(replace(FromEMailAddress,char(13),''),char(10),''),';',' ') as FromEMailAddress,CaseID,OutboundFlag,replace(replace(replace(MailBoxName,char(13), ''),char(10),''),';',' ') as MailBoxName,MessageTemplateID,RuleID,CreateDate,CreateDateKey,AttachmentCount from dbo.ExpeRTMessage (nolock) where MessageID >= 20292782 and MessageID <= {max_id} and MessageID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_message",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_message_stage",
+        "stage_table": "stage.expert_message_stage",
+        "delta_query_part_1": "insert into public.expert_message select es.*, ",
+        "delta_query_part_2": " from stage.expert_message_stage es left outer join public.expert_message ep on ep.messageid = es.messageid where ep.messageid is null",
+        "create_stage_table": "create table if not exists stage.expert_message_stage      (      messageid          integer        NOT NULL,      messagesubject     varchar(1000),      agentid            integer        NOT NULL,      toemailaddress     varchar(750),      ccemailaddress     varchar(750),      bccemailaddress    varchar(500),      fromemailaddress   varchar(150),      caseid             integer        NOT NULL,      outboundflag       boolean        NOT NULL,      mailboxname        varchar(100)   NOT NULL,      messagetemplateid  integer        NOT NULL,      ruleid             integer        NOT NULL,      createdate         timestamp      NOT NULL,      createdatekey      timestamp      NOT NULL,      attachmentcount    integer        NOT NULL      );      commit;",
+        "create_public_table": "create table if not exists public.expert_message      (      messageid          integer        NOT NULL,      messagesubject     varchar(1000),      agentid            integer        NOT NULL,      toemailaddress     varchar(750),      ccemailaddress     varchar(750),      bccemailaddress    varchar(500),      fromemailaddress   varchar(150),      caseid             integer        NOT NULL,      outboundflag       boolean        NOT NULL,      mailboxname        varchar(150)   NOT NULL,      messagetemplateid  integer        NOT NULL,      ruleid             integer        NOT NULL,      createdate         timestamp      NOT NULL,      createdatekey      timestamp      NOT NULL,      attachmentcount    integer        NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTASADetail",
+        "columnid": "",
+        "sql": "select CaseID,InboundMessageID,OutboundMessageID,AgentID,replace(replace(replace(PointOfSaleEmail,char(13),''),char(10),''),';',' ') as PointOfSaleEmail,convert(varchar,InboundMessageDate,120) as InboundMessageDate,convert(varchar,OutboundMessageDate,120) as OutboundMessageDate,InboundMessageDateKey,OutboundMessageDateKey,ASAMinutes from dbo.ExpeRTASADetail (nolock) where ((1 = {full} and (year(InboundMessageDate) >= 2017 or year(OutboundMessageDate) >= 2017)) or (0 = {full} and (year(InboundMessageDate) >= {lastprocessedid} or year(OutboundMessageDate) >= {lastprocessedid})))",
+        "sql_": "select CaseID,InboundMessageID,OutboundMessageID,AgentID,replace(replace(replace(PointOfSaleEmail,char(13),''),char(10),''),';',' ') as PointOfSaleEmail,convert(varchar,InboundMessageDate,120) as InboundMessageDate,convert(varchar,OutboundMessageDate,120) as OutboundMessageDate,InboundMessageDateKey,OutboundMessageDateKey,ASAMinutes from dbo.ExpeRTASADetail (nolock) where year(InboundMessageDate) >= 2017 or year(OutboundMessageDate) >= 2017",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_asa_detail",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_asa_detail_stage",
+        "stage_table": "stage.expert_asa_detail_stage",
+        "delta_query_part_1": "insert into public.expert_asa_detail select es.*, ",
+        "delta_query_part_2": " from stage.expert_asa_detail_stage es left outer join public.expert_asa_detail ep on ep.caseid = es.caseid and ep.inboundmessageid = es.inboundmessageid and ep.outboundmessageid = es.outboundmessageid where ep.caseid is null",
+        "create_stage_table": "create table if not exists expert_asa_detail_stage        (        caseid                  integer         NOT NULL,        inboundmessageid        integer         NOT NULL,        outboundmessageid       integer         NOT NULL,        agentid                 integer         NOT NULL,        pointofsaleemail        varchar(255)    NOT NULL,        inboundmessagedate      timestamp       NOT NULL,        outboundmessagedate     timestamp       NOT NULL,        inboundmessagedatekey   timestamp       NOT NULL,        outboundmessagedatekey  timestamp       NOT NULL,        asaminutes              numeric(10,2)   NOT NULL        );        commit;",
+        "create_public_table": "create table if not exists public.expert_asa_detail      (      caseid                  integer         NOT NULL,      inboundmessageid        integer         NOT NULL,      outboundmessageid       integer         NOT NULL,      agentid                 integer         NOT NULL,      pointofsaleemail        varchar(255)    NOT NULL,      inboundmessagedate      timestamp       NOT NULL,      outboundmessagedate     timestamp       NOT NULL,      inboundmessagedatekey   timestamp       NOT NULL,      outboundmessagedatekey  timestamp       NOT NULL,      asaminutes              numeric(10,2)   NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );      commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTAgent",
+        "columnid": "AgentID",
+        "sql": "",
+        "sql_": "select AgentID, replace(replace(replace(AgentLogin,char(13),''),char(10),''),';',' ') as AgentLogin, replace(replace(replace(AgentFirstName,char(13),''),char(10),''),';',' ') as AgentFirstName, replace(replace(replace(AgentLastName,char(13),''),char(10),''),';',' ') as AgentLastName, ServiceProviderID, PrimaryWorkGroupID, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.ExpeRTAgent",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_agent",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_agent_stage",
+        "stage_table": "stage.expert_agent_stage",
+        "delta_query_part_1": "insert into public.expert_agent select es.*, ",
+        "delta_query_part_2": " from stage.expert_agent_stage es left outer join public.expert_agent ep on ep.agentid = es.agentid where ep.agentid is null",
+        "create_stage_table": "create table if not exists stage.expert_agent_stage(   agentid            integer          NOT NULL,   agentlogin         varchar(510)     NOT NULL,   agentfirstname     varchar(510)     NOT NULL,   agentlastname      varchar(510)     NOT NULL,   serviceproviderid  int              NOT NULL,   primaryworkgroupid int              NOT NULL,   createdate         timestamp        NOT NULL,   updatedate         timestamp        NOT NULL); commit;",
+        "create_public_table": "create table if not exists public.expert_agent(   agentid            integer          NOT NULL,   agentlogin         varchar(510)     NOT NULL,   agentfirstname     varchar(510)     NOT NULL,   agentlastname      varchar(510)     NOT NULL,   serviceproviderid  int              NOT NULL,   primaryworkgroupid int              NOT NULL,   createdate         timestamp        NOT NULL,   updatedate         timestamp        NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCasePriority",
+        "columnid": "CasePriorityID",
+        "sql": "",
+        "sql_": "select CasePriorityID, replace(replace(replace(PriorityDescription,char(13),''),char(10),''),';',' ') as PriorityDescription, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.ExpeRTCasePriority",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_case_priority",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_case_priority_stage",
+        "stage_table": "stage.expert_case_priority_stage",
+        "delta_query_part_1": "insert into public.expert_case_priority select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_priority_stage es left outer join public.expert_case_priority ep on ep.casepriorityid = es.casepriorityid where ep.casepriorityid is null",
+        "create_stage_table": "create table if not exists stage.expert_case_priority_stage(   casepriorityid        integer          NOT NULL,   prioritydescription   varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_case_priority(   casepriorityid        integer          NOT NULL,   prioritydescription   varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL,      datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCaseSource",
+        "columnid": "CaseSourceID",
+        "sql": "",
+        "sql_": "select CaseSourceID, replace(replace(replace(SourceName,char(13),''),char(10),''),';',' ') as SourceName, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.ExpeRTCaseSource",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_case_source",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_case_source_stage",
+        "stage_table": "stage.expert_case_source_stage",
+        "delta_query_part_1": "insert into public.expert_case_source select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_source_stage es left outer join public.expert_case_source ep on ep.casesourceid = es.casesourceid where ep.casesourceid is null",
+        "create_stage_table": "create table if not exists stage.expert_case_source_stage(   casesourceid          integer          NOT NULL,   sourcename            varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_case_source(   casesourceid          integer          NOT NULL,   sourcename            varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL,       datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCaseStatus",
+        "columnid": "CaseStatusID",
+        "sql": "",
+        "sql_": "select CaseStatusID, replace(replace(replace(StatusDescription,char(13),''),char(10),''),';',' ') as StatusDescription, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.ExpeRTCaseStatus",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_case_status",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_case_status_stage",
+        "stage_table": "stage.expert_case_status_stage",
+        "delta_query_part_1": "insert into public.expert_case_status select es.*, ",
+        "delta_query_part_2": " from stage.expert_case_status_stage es left outer join public.expert_case_status ep on ep.casestatusid = es.casestatusid where ep.casestatusid is null",
+        "create_stage_table": "create table if not exists stage.expert_case_status_stage(   casestatusid          integer          NOT NULL,   statusdescription     varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_case_status(   casestatusid          integer          NOT NULL,   statusdescription     varchar(510)     NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL,       datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTServiceProvider",
+        "columnid": "ServiceProviderID",
+        "sql": "",
+        "sql_": "select ServiceProviderID, replace(replace(replace(ServiceProviderName,char(13),''),char(10),''),';',' ') as ServiceProviderName, TimeZoneID, ObsoleteFlag, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.ExpeRTServiceProvider",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_service_provider",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_service_provider_stage",
+        "stage_table": "stage.expert_service_provider_stage",
+        "delta_query_part_1": "insert into public.expert_service_provider select es.*, ",
+        "delta_query_part_2": " from stage.expert_service_provider_stage es left outer join public.expert_service_provider ep on ep.serviceproviderid = es.serviceproviderid where ep.serviceproviderid is null",
+        "create_stage_table": "create table if not exists stage.expert_service_provider_stage(   serviceproviderid     integer          NOT NULL,   serviceprovidername   varchar(510)     NOT NULL,   timezoneid            integer          NOT NULL,   obsoleteflag          integer          NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_service_provider(   serviceproviderid     integer          NOT NULL,   serviceprovidername   varchar(510)     NOT NULL,   timezoneid            integer          NOT NULL,   obsoleteflag          integer          NOT NULL,   createdate            timestamp        NOT NULL,   updatedate            timestamp        NOT NULL,       datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "GroupAccount",
+        "columnid": "",
+        "sql": "",
+        "sql_": "select TravelProductID, GroupAccountID, replace(replace(replace(GroupAccountName,char(13),''),char(10),''),';',' ') as GroupAccountName, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.GroupAccount",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_group_account",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_group_account_stage",
+        "stage_table": "stage.expert_group_account_stage",
+        "delta_query_part_1": "insert into public.expert_group_account select es.*, ",
+        "delta_query_part_2": " from stage.expert_group_account_stage es left outer join public.expert_group_account ep on ep.travelproductid = es.travelproductid and ep.groupaccountid = es.groupaccountid where ep.travelproductid is null",
+        "create_stage_table": "create table if not exists stage.expert_group_account_stage(   travelproductid           integer          NOT NULL,   groupaccountid            integer          NOT NULL,   groupaccountname          varchar(200)     NOT NULL,   createdate                timestamp        NOT NULL,   updatedate                timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_group_account(   travelproductid           integer          NOT NULL,   groupaccountid            integer          NOT NULL,   groupaccountname          varchar(200)     NOT NULL,   createdate                timestamp        NOT NULL,   updatedate                timestamp        NOT NULL,       datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "TravelProduct",
+        "columnid": "",
+        "sql": "",
+        "sql_": "select TravelProductID, replace(replace(replace(TravelProductName,char(13),''),char(10),''),';',' ') as TravelProductName, convert(varchar,CreateDate,120) as CreateDate, convert(varchar,UpdateDate,120) as UpdateDate from dbo.TravelProduct",
+        "is_active": 1,
+        "delta": 0,
+        "target": "expert_travel_product",
+        "loading_method": "full",
+        "truncate_stage_table": "truncate table stage.expert_travel_product_stage",
+        "stage_table": "stage.expert_travel_product_stage",
+        "delta_query_part_1": "insert into public.expert_travel_product select es.*, ",
+        "delta_query_part_2": " from stage.expert_travel_product_stage es left outer join public.expert_travel_product ep on ep.travelproductid = es.travelproductid where ep.travelproductid is null",
+        "create_stage_table": "create table if not exists stage.expert_travel_product_stage(   travelproductid           integer          NOT NULL,   travelproductname         varchar(50)      NOT NULL,   createdate                timestamp        NOT NULL,   updatedate                timestamp        NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_travel_product(   travelproductid           integer          NOT NULL,   travelproductname         varchar(50)      NOT NULL,   createdate                timestamp        NOT NULL,   updatedate                timestamp        NOT NULL,       datalakefilelocation varchar(255),      isrecordactive       integer,      creationdate         timestamp,      updateddate          timestamp,      createdby            varchar(50)      );commit;"
+      }
+    },
+    {
+      "source": {
+        "type": "sql",
+        "location": "ExpeRTCustomer",
+        "columnid": "CaseID",
+        "sql": "",
+        "sql_": "SELECT cus.TravelProductID, cus.TUID, cus.GroupAccountID, cus.CustomerTierID, cus.FirstName, cus.MiddleName, cus.LastName, cus.EMailAddress, cus.CreateDate, cus.UpdateDate FROM dbo.ExpeRTCaseCurrent cct INNER JOIN dbo.ExpeRTCustomer cus ON (cct.TravelProductID=cus.TravelProductID AND cct.TUID=cus.TUID) WHERE cct.CaseID >= 119277935 AND CaseID <= {max_id} AND CaseID > {last_processed_id}",
+        "is_active": 1,
+        "delta": 1,
+        "target": "expert_customer",
+        "loading_method": "delta",
+        "truncate_stage_table": "truncate table stage.expert_customer_stage",
+        "stage_table": "stage.expert_customer_stage",
+        "delta_query_part_1": "insert into public.expert_customer select sec.*, ",
+        "delta_query_part_2": " from stage.expert_customer_stage sec left outer join public.expert_customer pec on (sec.travelproductid = pec.travelproductid and sec.tuid = pec.tuid) where (pec.travelproductid is null and pec.tuid is null)",
+        "create_stage_table": "create table if not exists stage.expert_customer_stage(travelproductid integer NOT NULL,TUID integer NOT NULL,groupaccountid integer not null,customertierid integer not null, firstname varchar(255), middlename varchar(255), lastname varchar(255), emailaddress varchar(500), createdate timestamp NOT NULL, updatedate timestamp NOT NULL);commit;",
+        "create_public_table": "create table if not exists public.expert_customer(travelproductid integer NOT NULL,TUID integer NOT NULL,groupaccountid integer not null,customertierid integer not null, firstname varchar(255), middlename varchar(255), lastname varchar(255), emailaddress varchar(500), createdate timestamp NOT NULL, updatedate timestamp NOT NULL, datalakefilelocation varchar(255), isrecordactive integer, creationdate timestamp, updateddate timestamp,createdby varchar(50));commit;"
+      }
+    }
+  ]
+}
+

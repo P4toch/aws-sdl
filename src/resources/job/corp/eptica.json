@@ -1,0 +1,297 @@
+{
+	"config": {
+		"region": "eu-west-1",
+		"bucket_data": "ege-gap-prod-corp-ew1",
+		"bucket_data_s3": "s3://ege-gap-prod-corp-ew1/GCO/public/CONTACT/EMAIL/EPTICA/",
+		"bucket_conf": "ege-gap-conf-prod-corp-ew1",
+		"prefix_conf": "GCO/CONTACT/EMAIL/EPTICA/",
+		"prefix_raw": "GCO/raw/CONTACT/EMAIL/EPTICA/",
+		"prefix_stage": "GCO/stage/CONTACT/EMAIL/EPTICA/",
+		"prefix_public": "GCO/public/CONTACT/EMAIL/EPTICA/",
+		"redshift_copy_cmd": "copy {table} from 's3://{bucket}/{prefix}{file}' iam_role '{iam_role}' delimiter '{delimiter}' ACCEPTINVCHARS IGNOREHEADER 1 TRIMBLANKS EMPTYASNULL IGNOREBLANKLINES CSV;",
+		"redshift_copy_cmd_iam_role": "arn:aws:iam::637266587021:role/REDSHIFT_CORP_RT_S3_ACCESS",
+		"redshift_copy_cmd_delimiter": ";",
+		"redshift_public_schema": "public"
+	},
+	"get_files": [{
+			"source": {
+				"type": "http",
+				"location": "http://egenciabe.epticahosting.com/datamart/egenciabe/EpticaDatamart-egenciabe.zip",
+				"instance": "BE"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciade.epticahosting.com/datamart/egenciade/EpticaDatamart-egenciade.zip",
+				"instance": "DE"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciahss.epticahosting.com/datamart/egenciahss/EpticaDatamart-egenciahss.zip",
+				"instance": "HSS"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciauk.epticahosting.com/datamart/egenciauk/EpticaDatamart-egenciauk.zip",
+				"instance": "UK"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciafr.epticahosting.com/datamart/egenciafr/EpticaDatamart-egenciafr.zip",
+				"instance": "FR"
+			},
+			"is_active": 1
+		},
+	    {
+		    "source" : {
+			    "type" : "http",
+			    "location" : "https://egencianordics.epticahosting.com/datamart/egencianordics/EpticaDatamart-egencianordics.zip",
+                "instance" : "NORDICS"
+		    },
+		    "is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciasg.epticahosting.com/datamart/egenciasg/EpticaDatamart-egenciasg.zip",
+				"instance": "SG"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "https://egenciacn.epticahosting.com/datamart/egenciacn/EpticaDatamart-egenciacn.zip",
+				"instance": "CN"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciahk.epticahosting.com/datamart/egenciahk/EpticaDatamart-egenciahk.zip",
+				"instance": "HK"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciain.epticahosting.com/datamart/egenciain/EpticaDatamart-egenciain.zip",
+				"instance": "IN"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciaau.epticahosting.com/datamart/egenciaau/EpticaDatamart-egenciaau.zip",
+				"instance": "AU"
+			},
+			"is_active": 1
+		},
+		{
+			"source": {
+				"type": "http",
+				"location": "http://egenciaph.epticahosting.com/datamart/egenciaph/EpticaDatamart-egenciaph.zip",
+				"instance": "PH"
+			},
+			"is_active": 0
+		}
+	],
+	"staging_to_public": [{
+			"file_name": "AccountEventInfo.csv",
+			"is_active": 1,
+			"sql_header": "eventid,accountid,accountgroupid,newaccountstate,previouseventid,applicationinstance,applicationid,eventdate",
+			"sql_format": "cast(coalesce(nullif(eventid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(accountgroupid,''),null) as int),cast(coalesce(nullif(newaccountstate,''),null) as int),cast(coalesce(nullif(previouseventid,''),null) as int),coalesce(nullif(applicationinstance,''),''),cast(coalesce(nullif(applicationid,''),null) as int),cast(coalesce(nullif(eventdate,''),null) as timestamp)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, eventid integer  encode zstd, accountid integer encode zstd, accountgroupid integer encode zstd, newaccountstate integer encode zstd, previouseventid integer encode zstd, applicationinstance character varying(50) encode zstd, applicationid integer encode zstd, eventdate timestamp without time zone encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+
+		},
+		{
+			"file_name": "AccountGroupInfo.csv",
+			"is_active": 1,
+			"sql_header": "accountgroupid,parentaccountgroupid,accountgrouplabel,isvalid",
+			"sql_format": "cast(coalesce(nullif(accountgroupid,''),null) as int),cast(coalesce(nullif(parentaccountgroupid,''),null) as int),coalesce(nullif(accountgrouplabel,''),''),cast(coalesce(nullif(isvalid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, accountgroupid integer encode zstd, parentaccountgroupid integer encode zstd, accountgrouplabel character varying(255) encode zstd, isvalid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd);"
+		},
+		{
+			"file_name": "AccountGroupLabels.csv",
+			"is_active": 1,
+			"sql_header": "accountgroupid,accountgrouplabel,labellanguage",
+			"sql_format": "cast(coalesce(nullif(accountgroupid,''),null) as int),coalesce(nullif(accountgrouplabel,''),''),coalesce(nullif(labellanguage,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, accountgroupid integer encode zstd, accountgrouplabel character varying(100) encode zstd, labellanguage character varying(25) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd);"
+		},
+		{
+			"file_name": "AccountInfo.csv",
+			"is_active": 1,
+			"sql_header": "accountid,accountgroupid,firstname,lastname,isguiagent,isemailagent,isautoagent,issupervisor,isadministrator,isvalid,isactive,isnetworkagent,accountlogin",
+			"sql_format": "cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(accountgroupid,''),null) as int),coalesce(nullif(firstname,''),''),coalesce(nullif(lastname,''),''),coalesce(nullif(isguiagent,''),''),coalesce(nullif(isemailagent,''),''),coalesce(nullif(isautoagent,''),''),coalesce(nullif(issupervisor,''),''),coalesce(nullif(isadministrator,''),''),cast(coalesce(nullif(isvalid,''),null) as int),coalesce(nullif(isactive,''),''),coalesce(nullif(isnetworkagent,''),''),coalesce(nullif(accountlogin,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, accountid integer encode zstd, accountgroupid integer encode zstd, firstname character varying(255) encode zstd, lastname character varying(255) encode zstd, isguiagent character varying(5) encode zstd, isemailagent character varying(5) encode zstd, isautoagent character varying(5) encode zstd, issupervisor character varying(5) encode zstd, isadministrator character varying(5) encode zstd, isvalid integer encode zstd, isactive character varying(5) encode zstd, isnetworkagent character varying(5) encode zstd, accountlogin character varying(255) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "AccountStateLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "ApplicationTypeLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "CustomerFieldInfo.csv",
+			"is_active": 1,
+			"sql_header": "customerid,createddate,lastmodificationdate,address,address2,authinfoid,authinfotype,city,companyname,country,createddate_1,customerid_1,efpfbfriendscount,email,facebookid,fax,firstname,hintgroupid,homephone,lastmodificationdate_1,lastname,mobilephone,salutation,selfpass,state,twitterid,workphone,zipcode",
+			"sql_format": "cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(createddate,''),null) as timestamp),cast(coalesce(nullif(lastmodificationdate,''),null) as timestamp),coalesce(nullif(address,''),''),coalesce(nullif(address2,''),''),cast(coalesce(nullif(authinfoid,''),null) as int),cast(coalesce(nullif(authinfotype,''),null) as int),coalesce(nullif(city,''),''),coalesce(nullif(companyname,''),''),coalesce(nullif(country,''),''),cast(coalesce(nullif(createddate_1,''),null) as timestamp),cast(coalesce(nullif(customerid_1,''),null) as int),cast(coalesce(nullif(efpfbfriendscount,''),null) as int),coalesce(nullif(email,''),''),coalesce(nullif(facebookid,''),''),coalesce(nullif(fax,''),''),coalesce(nullif(firstname,''),''),cast(coalesce(nullif(hintgroupid,''),null) as int),coalesce(nullif(homephone,''),''),cast(coalesce(nullif(lastmodificationdate_1,''),null) as timestamp),coalesce(nullif(lastname,''),''),coalesce(nullif(mobilephone,''),''),coalesce(nullif(salutation,''),''),coalesce(nullif(selfpass,''),''),coalesce(nullif(state,''),''),coalesce(nullif(twitterid,''),''),coalesce(nullif(workphone,''),''),coalesce(nullif(zipcode,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, customerid integer encode zstd, createddate timestamp without time zone encode zstd, lastmodificationdate timestamp without time zone encode zstd, address character varying(255) encode zstd, address2 character varying(255) encode zstd, authinfoid integer encode zstd, authinfotype integer encode zstd, city character varying(100) encode zstd, companyname character varying(255) encode zstd, country character varying(255) encode zstd, createddate_1 timestamp without time zone encode zstd, customerid_1 integer encode zstd, customernumber integer encode zstd, efpfbfriendscount integer encode zstd, email character varying(255) encode zstd, facebookid character varying(255) encode zstd, fax character varying(255) encode zstd, firstname character varying(255) encode zstd, hintgroupid integer encode zstd, homephone character varying(255) encode zstd, lastmodificationdate_1 timestamp without time zone encode zstd, lastname character varying(255) encode zstd, mobilephone character varying(255) encode zstd, salutation character varying(100) encode zstd, salutationid integer encode zstd, selfpass character varying(255) encode zstd, state character varying(255) encode zstd, twitterid character varying(255) encode zstd, workphone character varying(255) encode zstd, zipcode character varying(100) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "EventInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,eventid,eventmajorid,eventminorid,newrequeststateid,eventdate,accountid,customeremaileventid,speedofanswer,speedofanswerworkinghours,handlingtime,templateid,speedofreview,toaccountid,toaccountgroupid",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),cast(coalesce(nullif(eventid,''),null) as int),cast(coalesce(nullif(eventmajorid,''),null) as int),cast(coalesce(nullif(eventminorid,''),null) as int),cast(coalesce(nullif(newrequeststateid,''),null) as int),cast(coalesce(nullif(eventdate,''),null) as timestamp),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(customeremaileventid,''),null) as int),cast(coalesce(nullif(speedofanswer,''),null) as int),cast(coalesce(nullif(speedofanswerworkinghours,''),null) as int),cast(coalesce(nullif(handlingtime,''),null) as int),cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(speedofreview,''),null) as int),cast(coalesce(nullif(toaccountid,''),null) as int),cast(coalesce(nullif(toaccountgroupid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, requestid integer encode zstd, eventid integer encode zstd, eventmajorid integer encode zstd, eventminorid integer encode zstd, newrequeststateid integer encode zstd, eventdate timestamp without time zone encode zstd, accountid integer encode zstd, customeremaileventid integer encode zstd, speedofanswer integer encode zstd, speedofanswerworkinghours integer encode zstd, handlingtime integer encode zstd, templateid integer encode zstd, speedofreview integer encode zstd, toaccountid integer encode zstd, toaccountgroupid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "EventMajorLabel.csv",
+			"is_active": 1,
+			"sql_header": "eventmajorid,eventmajor",
+			"sql_format": "cast(coalesce(nullif(eventmajorid,''),null) as int),coalesce(nullif(eventmajor,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, eventmajorid integer encode zstd, eventmajor character varying(200) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "EventMinorLabel.csv",
+			"is_active": 1,
+			"sql_header": "eventminorid,eventminor",
+			"sql_format": "cast(coalesce(nullif(eventminorid,''),null) as int),coalesce(nullif(eventminor,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, eventminorid integer encode zstd, eventminor character varying(200) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "LovField.csv",
+			"is_active": 1,
+			"sql_header": "lovid,lovparentid,lovorderingrank,lovcreationdate,lovmodificationdate",
+			"sql_format": "cast(coalesce(nullif(lovid,''),null) as int),cast(coalesce(nullif(lovparentid,''),null) as int),cast(coalesce(nullif(lovorderingrank,''),null) as int),cast(coalesce(nullif(lovcreationdate,''),null) as timestamp),cast(coalesce(nullif(lovmodificationdate,''),null) as timestamp)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, lovid integer encode zstd, lovparentid integer encode zstd, lovorderingrank integer encode zstd, lovcreationdate timestamp without time zone encode zstd, lovmodificationdate timestamp without time zone encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "LovFieldValues.csv",
+			"is_active": 1,
+			"sql_header": "lovid,lovlabel,lovlabellanguage",
+			"sql_format": "cast(coalesce(nullif(lovid,''),null) as int),coalesce(nullif(lovlabel,''),''),coalesce(nullif(lovlabellanguage,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, lovid integer encode zstd, lovlabel character varying(100) encode zstd, lovlabellanguage character varying(25) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "RequestFieldInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,action,actionid,eadscommitment,eadsinfos,eadsinitobjdate,eadspercentage,eadsreopobjdate,eadsthreshold,eadstimezone,efpcategory,efporiginator,efpquestionid,efpusername,ermterror,esodata,moduleteam,moduleteamid,product,productid,requestid_1",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),coalesce(nullif(action,''),''),cast(coalesce(nullif(actionid,''),null) as int),coalesce(nullif(eadscommitment,''),''),coalesce(nullif(eadsinfos,''),''),coalesce(nullif(eadsinitobjdate,''),''),cast(coalesce(nullif(eadspercentage,''),null) as int),coalesce(nullif(eadsreopobjdate,''),''),coalesce(nullif(eadsthreshold,''),''),coalesce(nullif(eadstimezone,''),''),coalesce(nullif(efpcategory,''),''),coalesce(nullif(efporiginator,''),''),coalesce(nullif(efpquestionid,''),''),coalesce(nullif(efpusername,''),''),coalesce(nullif(ermterror,''),''),coalesce(nullif(esodata,''),''),coalesce(nullif(moduleteam,''),''),cast(coalesce(nullif(moduleteamid,''),null) as int),coalesce(nullif(product,''),''),cast(coalesce(nullif(productid,''),null) as int),cast(coalesce(nullif(requestid_1,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, requestid integer encode zstd, action character varying(255) encode zstd, actionid integer encode zstd, eadscommitment character varying(255) encode zstd, eadsinfos character varying(255) encode zstd, eadsinitobjdate character varying(100) encode zstd, eadspercentage integer encode zstd, eadsreopobjdate character varying(100) encode zstd, eadsthreshold character varying(100) encode zstd, eadstimezone character varying(100) encode zstd, efpcategory character varying(255) encode zstd, efporiginator character varying(255) encode zstd, efpquestionid character varying(255) encode zstd, efpusername character varying(255) encode zstd, esodata character varying(255) encode zstd, moduleteam character varying(255) encode zstd, moduleteamid integer encode zstd, product character varying(100) encode zstd, productid integer encode zstd, requestid_1 integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd, ermterror character varying(300) encode zstd)"
+		},
+		{
+			"file_name": "RequestInfo.csv",
+			"is_active": 1,
+			"sql_header": "requestid,requestopeningdate,requestclosingdate,requeststateid,requestmedia,requesttypeid,requestsource,requestlanguage,requestclosingagentid,requestclosinggroupid,incomingemailnbr,outgoingemailnbr,distributable,customerid",
+			"sql_format": "cast(coalesce(nullif(requestid,''),null) as int),cast(coalesce(nullif(requestopeningdate,''),null) as timestamp),cast(coalesce(nullif(requestclosingdate,''),null) as timestamp),cast(coalesce(nullif(requeststateid,''),null) as int),coalesce(nullif(requestmedia,''),'0'),cast(coalesce(nullif(requesttypeid,''),null) as int),coalesce(nullif(requestsource,''),'0'),coalesce(nullif(requestlanguage,''),'0'),cast(coalesce(nullif(requestclosingagentid,''),null) as int),cast(coalesce(nullif(requestclosinggroupid,''),null) as int),cast(coalesce(nullif(incomingemailsnbr,''),null) as int),cast(coalesce(nullif(outgoingemailsnbr,''),null) as int),coalesce(nullif(distributable,''),'0'),cast(coalesce(nullif(customerid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, requestid integer encode zstd, requestopeningdate timestamp without time zone encode zstd, requestclosingdate timestamp without time zone encode zstd, requeststateid integer encode zstd, requestmedia character varying(100) encode zstd, requesttypeid integer encode zstd, requestsource character varying(100) encode zstd, requestlanguage character varying(50) encode zstd, requestclosingagentid integer encode zstd, requestclosinggroupid integer encode zstd, incomingemailnbr integer encode zstd, outgoingemailnbr integer encode zstd, distributable character varying(10) encode zstd, customerid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "RequestStateLabel.csv",
+			"is_active": 1,
+			"sql_header": "requeststateid,requeststate",
+			"sql_format": "cast(coalesce(nullif(requeststateid,''),null) as int),coalesce(nullif(requeststate,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, requeststateid integer encode zstd, requeststate character varying(50) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "RequestTypeLabel.csv",
+			"is_active": 1,
+			"sql_header": "requesttypeid,requesttype",
+			"sql_format": "cast(coalesce(nullif(requesttypeid,''),null) as int),coalesce(nullif(requesttype,''),'')",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, requesttypeid integer encode zstd, requesttype character varying(50) encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "SearchInfo.csv",
+			"is_active": 1,
+			"sql_header": "searchid,sentenceid,locale,applicationinstance,searchkind,searchdate,customerid,accountid,sessionid,requestid,nbtemplatefound,toptemplateid",
+			"sql_format": "cast(coalesce(nullif(searchid,''),null) as int),cast(coalesce(nullif(sentenceid,''),null) as int),coalesce(nullif(locale,''),''),coalesce(nullif(applicationinstance,''),''),cast(coalesce(nullif(searchkind,''),null) as int),cast(coalesce(nullif(searchdate,''),null) as timestamp),cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int),cast(coalesce(nullif(sessionid,''),null) as int),cast(coalesce(nullif(requestid,''),null) as int),coalesce(nullif(nbtemplatefound,''),''),cast(coalesce(nullif(toptemplateid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, searchid integer encode zstd, sentenceid integer encode zstd, locale character varying(50) encode zstd, applicationinstance character varying(100) encode zstd, searchkind integer encode zstd, searchdate timestamp without time zone encode zstd, customerid integer encode zstd, accountid integer encode zstd, sessionid integer encode zstd, requestid integer encode zstd, nbtemplatefound character varying(50) encode zstd, toptemplateid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "SearchKindLabel.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "SearchSequencesInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "SearchWordInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateGroupInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateGroupLabels.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateHitInfo.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateInfo.csv",
+			"is_active": 1,
+			"sql_header": "templateid,templategroupid,templatetitle,templateisvalid,templatedoesnotexpire,templatestartvaliditydate,templateendvaliditydate,templatemodificationdate,templatecreationdate,templatecreatorid,templatemodifierid",
+			"sql_format": "cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(templategroupid,''),null) as int),coalesce(nullif(templatetitle,''),''),coalesce(nullif(templateisvalid,''),''),coalesce(nullif(templatedoesnotexpire,''),''),cast(coalesce(nullif(templatestartvaliditydate,''),null) as timestamp),cast(coalesce(nullif(templateendvaliditydate,''),null) as timestamp),cast(coalesce(nullif(templatemodificationdate,''),null) as timestamp),cast(coalesce(nullif(templatecreationdate,''),null) as timestamp),cast(coalesce(nullif(templatecreatorid,''),null) as int),cast(coalesce(nullif(templatemodifierid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, templateid integer encode zstd, templategroupid integer encode zstd, templatetitle character varying(255) encode zstd, templateisvalid character varying(5) encode zstd, templatedoesnotexpire character varying(5) encode zstd, templatestartvaliditydate timestamp without time zone encode zstd, templateendvaliditydate timestamp without time zone encode zstd, templatemodificationdate timestamp without time zone encode zstd, templatecreationdate timestamp without time zone encode zstd, templatecreatorid integer encode zstd, templatemodifierid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		},
+		{
+			"file_name": "TemplateLabels.csv",
+			"is_active": 0,
+			"sql_header": "",
+			"sql_format": "",
+			"create_public_table": ""
+		},
+		{
+			"file_name": "TemplateRankInfo.csv",
+			"is_active": 1,
+			"sql_header": "templateid,rankdate,rankapplicationtype,rankinstancename,rankvalue,ranklanguage,customerid,accountid",
+			"sql_format": "cast(coalesce(nullif(templateid,''),null) as int),cast(coalesce(nullif(rankdate,''),null) as timestamp),coalesce(nullif(rankapplicationtype,''),''),coalesce(nullif(rankinstancename,''),''),coalesce(nullif(rankvalue,''),''),coalesce(nullif(ranklanguage,''),''),cast(coalesce(nullif(customerid,''),null) as int),cast(coalesce(nullif(accountid,''),null) as int)",
+			"create_public_table": "create table if not exists {table_name} (epticainstanceid character varying(10) encode zstd, templateid integer encode zstd, rankdate timestamp without time zone encode zstd, rankapplicationtype character varying(100) encode zstd, rankinstancename character varying(255) encode zstd, rankvalue character varying(100) encode zstd, ranklanguage character varying(50) encode zstd, customerid integer encode zstd, accountid integer encode zstd, isrecordactive integer encode zstd, creationdate timestamp without time zone encode zstd, updateddate timestamp without time zone encode zstd, createdby character varying(50) encode zstd)"
+		}
+	]
+}
